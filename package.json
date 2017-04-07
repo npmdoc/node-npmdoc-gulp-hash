@@ -1,17 +1,40 @@
 {
-    "buildNpmdoc":"gulp-hash",
+    "author": "kai zhu <kaizhu256@gmail.com>",
+    "buildNpmdoc": "gulp-hash",
+    "description": "api documentation for [gulp-hash (v4.1.1)](https://github.com/Dragory/gulp-hash) [![npm package](https://img.shields.io/npm/v/npmdoc-gulp-hash.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-gulp-hash) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-gulp-hash.svg)](https://travis-ci.org/npmdoc/node-npmdoc-gulp-hash)",
     "devDependencies": {
-        "gulp-hash": "*",
         "electron-lite": "kaizhu256/node-electron-lite#alpha",
+        "gulp-hash": "*",
         "utility2": "kaizhu256/node-utility2#alpha"
     },
-    "name":"npmdoc-gulp-hash",
+    "engines": {
+        "node": ">=4.0"
+    },
+    "homepage": "https://github.com/npmdoc/node-npmdoc-gulp-hash",
+    "keywords": [
+        "documentation",
+        "gulp-hash"
+    ],
+    "license": "MIT",
+    "main": "lib.npmdoc_gulp_hash.js",
+    "name": "npmdoc-gulp-hash",
+    "nameAlias": "npmdoc_gulp_hash",
+    "nameOriginal": "npmdoc-gulp-hash",
+    "os": [
+        "darwin",
+        "linux"
+    ],
     "repository": {
         "type": "git",
         "url": "https://github.com/npmdoc/node-npmdoc-gulp-hash"
     },
     "scripts": {
-        "build-ci": "utility2 shReadmeTest build_ci.sh"
+        "build-ci": "utility2 shReadmeTest build_ci.sh",
+        "env": "env",
+        "heroku-postbuild": "(set -e; npm install \"kaizhu256/node-utility2#alpha\"; utility2 shDeployHeroku)",
+        "postinstall": "if [ -f npm_scripts.sh ]; then ./npm_scripts.sh postinstall; fi",
+        "start": "(set -e; export PORT=${PORT:-8080}; utility2 start test.js)",
+        "test": "(set -e; export PORT=$(utility2 shServerPortRandom); utility2 test test.js)"
     },
     "version": "0.0.1"
 }
