@@ -1,0 +1,212 @@
+<html><head></head><body><div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a href="https://github.com/Dragory/gulp-hash">gulp-hash (v4.1.1)</a>
+</h1>
+<h4>Cachebust your assets by adding a hash to the filename</h4>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.gulp-hash">module gulp-hash</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-hash.manifest">
+            function <span class="apidocSignatureSpan">gulp-hash.</span>manifest
+            <span class="apidocSignatureSpan">(manifestPath, options)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-hash.resetManifestCache">
+            function <span class="apidocSignatureSpan">gulp-hash.</span>resetManifestCache
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.gulp-hash" id="apidoc.module.gulp-hash">module gulp-hash</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.gulp-hash.manifest" id="apidoc.element.gulp-hash.manifest">
+        function <span class="apidocSignatureSpan">gulp-hash.</span>manifest
+        <span class="apidocSignatureSpan">(manifestPath, options)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">manifest = function (manifestPath, options) {
+	var space = null;
+	var append = true;
+	var sourceDir = __dirname;
+	var deleteOld = false;
+
+	if (arguments.length === 2 &amp;&amp; typeof options === 'object') {
+		// New signature
+		if (options.append != null) append = options.append;
+		if (options.space != null) space = options.space;
+		if (options.sourceDir) sourceDir = options.sourceDir;
+		deleteOld = !!options.deleteOld;
+	} else {
+		// Old signature
+		if (arguments[1] != null) append = arguments[1];
+		if (arguments[2] != null) space = arguments[2];
+	}
+
+	var newManifest = {};
+
+	if (append &amp;&amp; ! origManifestContents[manifestPath]) {
+		try {
+			var content = fs.readFileSync(manifestPath, {encoding: 'utf8'});
+			origManifestContents[manifestPath] = JSON.parse(content);
+		} catch (e) {
+			origManifestContents[manifestPath] = {};
+		}
+	}
+
+	function deleteOldFiles(oldFiles, newFiles, dirPath) {
+		for (var prop in oldFiles) {
+			if (newFiles.hasOwnProperty(prop) === false || oldFiles[prop] !== newFiles[prop]) {
+				try {
+					fs.unlinkSync(path.join(dirPath, oldFiles[prop]));
+				} catch (e) {
+					console.warn(e.message);
+				}
+			}
+		}
+	}
+
+	return through2.obj(
+		function(file, enc, cb) {
+			if (typeof file.origPath !== 'undefined') {
+				var manifestSrc = formatManifestPath(file.origPath);
+				var manifestDest = formatManifestPath(file.relative);
+				newManifest[manifestSrc] = manifestDest;
+			}
+
+			cb();
+		},
+
+		function(cb) {
+			var finish = function (data) {
+				if (deleteOld) {
+					deleteOldFiles(origManifestContents[manifestPath], data, sourceDir);
+				}
+
+				origManifestContents[manifestPath] = data;
+
+				this.push(new gutil.File({
+					path: manifestPath,
+					contents: new Buffer(JSON.stringify(origManifestContents[manifestPath], undefined, space))
+				}));
+
+				cb();
+			}.bind(this);
+
+			if (append) {
+				appendQueue.then(new Promise(function(resolve) {
+					finish(assign({}, origManifestContents[manifestPath], newManifest));
+					resolve();
+				}));
+			} else {
+				finish(newManifest);
+			}
+		}
+	);
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+```javascript
+var hash = require('gulp-hash');
+
+gulp.src('./js/**/*.js')
+	.pipe(hash()) // Add hashes to the files' names
+	.pipe(gulp.dest('public/js')) // Write the renamed files
+	.pipe(hash.<span class="apidocCodeKeywordSpan">manifest</span>('assets.json', {
+	  deleteOld: true,
+	  sourceDir: __dirname + '/public/js'
+	})) // Switch to the manifest file
+	.pipe(gulp.dest('public')); // Write the manifest file
+```
+
+The "manifest" is a JSON file that maps the original filenames to the renamed ones.
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.gulp-hash.resetManifestCache" id="apidoc.element.gulp-hash.resetManifestCache">
+        function <span class="apidocSignatureSpan">gulp-hash.</span>resetManifestCache
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">resetManifestCache = function () {
+	origManifestContents = {};
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
+</body></html>
